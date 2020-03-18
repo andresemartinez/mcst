@@ -28,7 +28,7 @@ function backup_server {
   rcon 'save-all'
 
   log 'Backuping server'
-  tar -cvpzf $server_base_path/backups/server-$(date +%Y%m%d%H%M%S).tar.gz -C $server_base_path server
+  tar -cvpzf $server_base_path/backups/backup-$(date +%Y%m%d%H%M%S).tar.gz -C $server_base_path server
 
   log 'Enabling autosave'
   rcon 'save-on'
@@ -38,7 +38,8 @@ function backup_server {
 function cicle_backups {
   log 'Cicling backups'
 #  find $server_base_path/backups/ -type f -mtime +8 -name '*.gz' -delete
-  ls -t $server_base_path/backups/ | grep -E "(\.tar\.gz)|(\.log)" | tail -n +11 | xargs rm
+#  ls -t $server_base_path/backups/ | grep -E "(\.tar\.gz)|(\.log)" | tail -n +11 | xargs rm
+   find /opt/minecraft/backups/ -name "backup-*" | tail -n +11 | xargs rmfind /opt/minecraft/backups/ -name "server-*" | tail -n +11 | xargs rm
 }
 
 if [ $(rcon 'list' | awk '{print $3}') -gt 0 ]
