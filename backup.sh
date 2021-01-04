@@ -1,8 +1,12 @@
 #!/bin/bash
 
-server_base_path=/opt/minecraft
-log_file_name=backup-$(date +%Y%m%d%H%M%S).log
-log_file_path=$server_base_path/backups/$log_file_name
+timestamp="$(date +%Y%m%d%H%M%S)"
+server_base_path="/home/minecraft"
+backups_folder="$server_base_path/backups"
+log_file_name="backup-$timestamp.log"
+log_file_path="$backups_folder/$log_file_name"
+backup_file_name="backup-$timestamp.tar.gz"
+backup_file_path="$backups_folder/$backup_file_name"
 
 ## Logs into $1 into a backup specific loggin file
 function log {
@@ -28,7 +32,7 @@ function backup_server {
   rcon 'save-all'
 
   log 'Backuping server'
-  tar -cvpzf $server_base_path/backups/backup-$(date +%Y%m%d%H%M%S).tar.gz -C $server_base_path server
+  tar -cvpzf "$backup_file_path" -C "$server_base_path" server
 
   log 'Enabling autosave'
   rcon 'save-on'
@@ -37,11 +41,10 @@ function backup_server {
 ## Delete everything but last 5 backups
 function cicle_backups {
   log 'Cicling backups'
-#  find $server_base_path/backups/ -type f -mtime +8 -name '*.gz' -delete
-#  ls -t $server_base_path/backups/ | grep -E "(\.tar\.gz)|(\.log)" | tail -n +11 | xargs rm
-   find /opt/minecraft/backups/ -name "backup-*" | tail -n +11 | xargs rmfind /opt/minecraft/backups/ -name "server-*" | tail -n +11 | xargs rm
+  ls -t "$backups_folder" | awk 'NR > 12 { print "/home/minecraft/backups/"$0 }' | xargs rm -v
 }
 
+## Execute backup if there is someone connected
 if [ $(rcon 'list' | awk '{print $3}') -gt 0 ]
 then 
   backup_server
